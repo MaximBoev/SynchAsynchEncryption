@@ -6,37 +6,236 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>607</width>
-    <height>400</height>
+    <width>618</width>
+    <height>472</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>SynchAsynchEncryption</string>
   </property>
-  <widget class="QWidget" name="centralWidget"/>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="page">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QPushButton" name="EncryptPageButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Шифровка</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="DecryptPageButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Дешифровка</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ElsectronicSignaturePageButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Электронная подпись</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="SettingsPageButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Настройки</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ExitButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Выход</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_4"/>
+      <widget class="QWidget" name="page_3"/>
+      <widget class="QWidget" name="page_2">
+       <widget class="QToolButton" name="toolButton">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>20</y>
+          <width>71</width>
+          <height>61</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="page_5"/>
+     </widget>
+    </item>
+   </layout>
+  </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>607</width>
+     <width>618</width>
      <height>33</height>
     </rect>
    </property>
+   <property name="defaultUp">
+    <bool>false</bool>
+   </property>
+   <property name="nativeMenuBar">
+    <bool>true</bool>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Меню</string>
+    </property>
+    <widget class="QMenu" name="MenuEncryptPage">
+     <property name="title">
+      <string>Шифровка</string>
+     </property>
+     <addaction name="MESynch"/>
+     <addaction name="MEAsynch"/>
+    </widget>
+    <widget class="QMenu" name="MenuDecryptPage_2">
+     <property name="title">
+      <string>Дешифровка</string>
+     </property>
+     <addaction name="MDSynch"/>
+     <addaction name="MDAsynch"/>
+    </widget>
+    <addaction name="MMainPage"/>
+    <addaction name="MBackPage"/>
+    <addaction name="MenuEncryptPage"/>
+    <addaction name="MenuDecryptPage_2"/>
+    <addaction name="MElectronicSignaturePage"/>
+    <addaction name="MExit"/>
+   </widget>
+   <addaction name="menu"/>
   </widget>
-  <widget class="QToolBar" name="mainToolBar">
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
    <attribute name="toolBarArea">
-    <enum>LeftToolBarArea</enum>
+    <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <action name="MElectronicSignaturePage">
+   <property name="text">
+    <string>Электронная подпись</string>
+   </property>
+  </action>
+  <action name="MSettingsPage">
+   <property name="text">
+    <string>Настройки</string>
+   </property>
+  </action>
+  <action name="MExit">
+   <property name="text">
+    <string>Выход</string>
+   </property>
+  </action>
+  <action name="MESynch">
+   <property name="text">
+    <string>Синхронная</string>
+   </property>
+  </action>
+  <action name="action_7">
+   <property name="text">
+    <string>Синхронная</string>
+   </property>
+  </action>
+  <action name="MEAsynch">
+   <property name="text">
+    <string>Асинхронная</string>
+   </property>
+  </action>
+  <action name="action_9">
+   <property name="text">
+    <string>Синхронная</string>
+   </property>
+  </action>
+  <action name="MDSynch">
+   <property name="text">
+    <string>Синхронная</string>
+   </property>
+  </action>
+  <action name="MDAsynch">
+   <property name="text">
+    <string>Асинхронная</string>
+   </property>
+  </action>
+  <action name="MBackPage">
+   <property name="text">
+    <string>Назад</string>
+   </property>
+  </action>
+  <action name="MMainPage">
+   <property name="text">
+    <string>Главная страница</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
   <include location="SynchAsynchEncryption.qrc"/>
  </resources>
  <connections/>
+ <slots>
+  <slot>slotCustom()</slot>
+ </slots>
 </ui>
