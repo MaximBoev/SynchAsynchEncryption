@@ -26,6 +26,7 @@ SynchAsynchEncryption::SynchAsynchEncryption(QWidget *parent)
     connect(ui.checkKeyButton, &QPushButton::clicked, this, &SynchAsynchEncryption::checkKeyPage);
     connect(ui.backButton_CKP, &QPushButton::clicked, this, &SynchAsynchEncryption::checkKeyExitPage);
     connect(ui.encryptButton, &QPushButton::clicked, this, &SynchAsynchEncryption::encrypt);
+    connect(ui.decryptButton, &QPushButton::clicked, this, &SynchAsynchEncryption::decrypt);
     
 }
 
@@ -93,11 +94,95 @@ void SynchAsynchEncryption::encryptSynch()
 
    ui.plainTextEditOutput_EP->setPlainText(encryptedText);
    ui.plainTextEditKeySynch->setPlainText(thisKey_);
-   
-
 }
 
 void SynchAsynchEncryption::encryptAsynch()
+{
+
+}
+
+void SynchAsynchEncryption::decrypt()
+{
+    if (!ui.synchRadioButton_DP->isChecked() && !ui.asynchRadioButton_DP->isChecked()) {
+        QMessageBox::warning(this, "Ошибка", "Вы забыли выбрать способ дешифровки текста.");
+        return;
+    }
+    if (ui.synchRadioButton_DP->isChecked()) decryptSynch();
+    else decryptAsynch();
+}
+
+void SynchAsynchEncryption::decryptSynch()
+{
+    //QString encryptedText_ = ui.plainTextEditInput_DP->toPlainText();
+    //QString thisKey_ = ui.plainTextEditKeySynch->toPlainText();
+    //std::string decryptedText_;
+    //
+    //std::string encryptedText = base64Decode(encryptedText_.toStdString());
+    //std::string thisKey = base64Decode(thisKey_.toStdString());
+    //
+    //std::string iv(encryptedText.begin(), encryptedText.begin() + EVP_MAX_IV_LENGTH);
+    //encryptedText.erase(encryptedText.begin(), encryptedText.begin() + EVP_MAX_IV_LENGTH);
+    //
+    //EVP_CIPHER_CTX* ctx;
+    //ctx = EVP_CIPHER_CTX_new();
+    //EVP_CIPHER_CTX_init(ctx);
+    //
+    //EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, reinterpret_cast<const unsigned char*>(thisKey.c_str()), reinterpret_cast<const unsigned char*>(iv.c_str()));
+    //
+    //int decryptedTextLen = encryptedText.length() + EVP_MAX_BLOCK_LENGTH;
+    //unsigned char* decryptedTextBuffer = new unsigned char[decryptedTextLen];
+    //
+    //int actualDecryptedTextLen;
+    //
+    //EVP_DecryptUpdate(ctx, decryptedTextBuffer, &actualDecryptedTextLen, reinterpret_cast<const unsigned char*>(encryptedText.c_str()), encryptedText.length());
+    //decryptedText_.append(reinterpret_cast<const char*>(decryptedTextBuffer), actualDecryptedTextLen);
+    //
+    //delete[] decryptedTextBuffer;
+    //
+    //EVP_CIPHER_CTX_free(ctx);
+    //
+    //std::string base64EncodedText = base64Encode(decryptedText_);
+    //QString decryptedText = QString::fromStdString(base64EncodedText);
+    //ui.plainTextEditOutput_DP->setPlainText(decryptedText);
+
+    QString encryptedText_ = ui.plainTextEditInput_DP->toPlainText();
+    QString thisKey_ = ui.plainTextEditKeySynch->toPlainText();
+    std::string decryptedText_;
+
+    // Декодирование текста из Base64 в бинарный вид
+    std::string encryptedText = base64Decode(encryptedText_.toStdString());
+    std::string thisKey = base64Decode(thisKey_.toStdString());
+
+    EVP_CIPHER_CTX* ctx;
+    ctx = EVP_CIPHER_CTX_new();
+    EVP_CIPHER_CTX_init(ctx);
+
+    // Извлечение IV из зашифрованного текста
+    std::string iv(encryptedText.begin(), encryptedText.begin() + EVP_MAX_IV_LENGTH);
+    encryptedText.erase(encryptedText.begin(), encryptedText.begin() + EVP_MAX_IV_LENGTH);
+
+    EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, reinterpret_cast<const unsigned char*>(thisKey.c_str()), reinterpret_cast<const unsigned char*>(iv.c_str()));
+
+    int decryptedTextLen = encryptedText.length() + EVP_MAX_BLOCK_LENGTH;
+    unsigned char* decryptedTextBuffer = new unsigned char[decryptedTextLen];
+
+    int actualDecryptedTextLen;
+
+    EVP_DecryptUpdate(ctx, decryptedTextBuffer, &actualDecryptedTextLen, reinterpret_cast<const unsigned char*>(encryptedText.c_str()), encryptedText.length());
+    decryptedText_.append(reinterpret_cast<const char*>(decryptedTextBuffer), actualDecryptedTextLen);
+
+    delete[] decryptedTextBuffer;
+
+    EVP_DecryptFinal_ex(ctx, decryptedTextBuffer + actualDecryptedTextLen, &actualDecryptedTextLen);
+
+    decryptedText_.append(reinterpret_cast<const char*>(decryptedTextBuffer), actualDecryptedTextLen);
+
+    EVP_CIPHER_CTX_free(ctx);
+
+    ui.plainTextEditOutput_DP->setPlainText(QString::fromStdString(decryptedText_));
+}
+
+void SynchAsynchEncryption::decryptAsynch()
 {
 
 }
@@ -135,6 +220,29 @@ std::string SynchAsynchEncryption::base64Encode(const std::string& input) {
     BIO_free_all(bio);
     return result;
 }
+
+std::string SynchAsynchEncryption::base64Decode(const std::string& input) {
+    BIO* bio, * b64;
+    b64 = BIO_new(BIO_f_base64());
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+    bio = BIO_new_mem_buf(input.c_str(), input.length());
+    bio = BIO_push(b64, bio);
+
+    std::string result;
+    const int bufferSize = 1024;
+    char buffer[bufferSize];
+    int bytesRead;
+
+    while ((bytesRead = BIO_read(bio, buffer, bufferSize)) > 0) {
+        result.append(buffer, bytesRead);
+    }
+
+    BIO_free_all(bio);
+    return result;
+}
+
+
+
 
 void SynchAsynchEncryption::encryptPage()
 {

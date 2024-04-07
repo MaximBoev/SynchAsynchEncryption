@@ -26,9 +26,13 @@ private:
     void encrypt();
     void encryptSynch();
     void encryptAsynch();
+    void decrypt();
+    void decryptSynch();
+    void decryptAsynch();
 
     std::string generateRandomKey();
     std::string toHex(const std::string& input);
     std::string base64Encode(const std::string& input);
+    std::string base64Decode(const std::string& input);
 
 };
