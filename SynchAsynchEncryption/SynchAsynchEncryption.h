@@ -12,16 +12,23 @@ public:
     ~SynchAsynchEncryption();
 
 private:
-    short indexPage[2] = { 0, 0 };
     Ui::SynchAsynchEncryptionClass ui;
 
     void mainPage();
-    void exitButtonPush();
     void encryptPage();
     void decryptPage();
     void electronicSignaturePage();
     void settingsPage();
-    void backPage();
+    void checkKeyPage();
+    void checkKeyExitPage();
 
-    void indexPageSwap(short index);
+    void exitButtonPush();
+    void encrypt();
+    void encryptSynch();
+    void encryptAsynch();
+
+    std::string generateRandomKey();
+    std::string toHex(const std::string& input);
+    std::string base64Encode(const std::string& input);
+
 };

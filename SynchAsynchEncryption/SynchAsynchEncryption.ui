@@ -23,16 +23,16 @@
    <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_10">
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="page">
+      <widget class="QWidget" name="mainPage">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QPushButton" name="EncryptPageButton">
+         <widget class="QPushButton" name="encryptPageButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -45,7 +45,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="DecryptPageButton">
+         <widget class="QPushButton" name="decryptPageButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -58,7 +58,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="ElsectronicSignaturePageButton">
+         <widget class="QPushButton" name="electronicSignaturePageButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -71,7 +71,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="SettingsPageButton">
+         <widget class="QPushButton" name="settingsPageButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -84,7 +84,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="ExitButton">
+         <widget class="QPushButton" name="exitButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -98,8 +98,172 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_4"/>
-      <widget class="QWidget" name="page_3"/>
+      <widget class="QWidget" name="encryptionPage">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QLabel" name="label_1_EP">
+            <property name="text">
+             <string>Поле ввода сообщения:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="plainTextEditInput_EP"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QRadioButton" name="synchRadioButton_EP">
+            <property name="text">
+             <string>Синхронно</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="asynchRadioButton_EP">
+            <property name="text">
+             <string>Асинхронно</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="encryptButton">
+            <property name="text">
+             <string>Зашифровать сообщение!</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QLabel" name="label_2_EP">
+            <property name="text">
+             <string>Поле вывода зашированного сообщения:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="plainTextEditOutput_EP"/>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="decryptionPage">
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QSplitter" name="splitter">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <widget class="QLabel" name="label_1_DP">
+             <property name="text">
+              <string>Поле ввода зашифрованного сообщения:</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="checkKeyButton">
+             <property name="text">
+              <string>Просмотр ключей -&gt;</string>
+             </property>
+            </widget>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="plainTextEditInput_DP"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QRadioButton" name="synchRadioButton_DP">
+            <property name="text">
+             <string>Синхронно</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="asynchRadioButton_DP">
+            <property name="text">
+             <string>Асинхронно</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="decryptionButton">
+            <property name="text">
+             <string>Расшифровать сообщение!</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QLabel" name="label_2_DP">
+            <property name="text">
+             <string>Поле вывода расшифрованного сообщения:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="plainTextEditOutput_DP"/>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="checkKeyPage">
+       <layout class="QVBoxLayout" name="verticalLayout_11">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <item>
+           <widget class="QSplitter" name="splitter_2">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <widget class="QLabel" name="label_1_CKP">
+             <property name="text">
+              <string>Текущий симетричный ключь:</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="backButton_CKP">
+             <property name="text">
+              <string>Вернуться назад</string>
+             </property>
+            </widget>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="plainTextEditKeySynch"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_9">
+          <item>
+           <widget class="QLabel" name="label_2_CKP">
+            <property name="text">
+             <string>Текущий асиметричный ключь:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="plainTextEditKeyAsynch"/>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="page_2">
        <widget class="QToolButton" name="toolButton">
         <property name="geometry">
@@ -115,7 +279,21 @@
         </property>
        </widget>
       </widget>
-      <widget class="QWidget" name="page_5"/>
+      <widget class="QWidget" name="page_5">
+       <widget class="QPushButton" name="pushButton_3">
+        <property name="geometry">
+         <rect>
+          <x>250</x>
+          <y>330</y>
+          <width>75</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>PushButton</string>
+        </property>
+       </widget>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -139,28 +317,21 @@
     <property name="title">
      <string>Меню</string>
     </property>
-    <widget class="QMenu" name="MenuEncryptPage">
-     <property name="title">
-      <string>Шифровка</string>
-     </property>
-     <addaction name="MESynch"/>
-     <addaction name="MEAsynch"/>
-    </widget>
-    <widget class="QMenu" name="MenuDecryptPage_2">
-     <property name="title">
-      <string>Дешифровка</string>
-     </property>
-     <addaction name="MDSynch"/>
-     <addaction name="MDAsynch"/>
-    </widget>
-    <addaction name="MMainPage"/>
-    <addaction name="MBackPage"/>
-    <addaction name="MenuEncryptPage"/>
-    <addaction name="MenuDecryptPage_2"/>
-    <addaction name="MElectronicSignaturePage"/>
-    <addaction name="MExit"/>
+    <addaction name="mMainPage"/>
+    <addaction name="mSettings"/>
+    <addaction name="mEncryptPage"/>
+    <addaction name="mDecryptPage"/>
+    <addaction name="mElectronicSignaturePage"/>
+    <addaction name="mExit"/>
+   </widget>
+   <widget class="QMenu" name="reference">
+    <property name="title">
+     <string>Справка</string>
+    </property>
+    <addaction name="rGetHelp"/>
    </widget>
    <addaction name="menu"/>
+   <addaction name="reference"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="toolBar">
@@ -174,7 +345,7 @@
     <bool>false</bool>
    </attribute>
   </widget>
-  <action name="MElectronicSignaturePage">
+  <action name="mElectronicSignaturePage">
    <property name="text">
     <string>Электронная подпись</string>
    </property>
@@ -184,12 +355,12 @@
     <string>Настройки</string>
    </property>
   </action>
-  <action name="MExit">
+  <action name="mExit">
    <property name="text">
     <string>Выход</string>
    </property>
   </action>
-  <action name="MESynch">
+  <action name="mESynch">
    <property name="text">
     <string>Синхронная</string>
    </property>
@@ -199,7 +370,7 @@
     <string>Синхронная</string>
    </property>
   </action>
-  <action name="MEAsynch">
+  <action name="mEAsynch">
    <property name="text">
     <string>Асинхронная</string>
    </property>
@@ -209,12 +380,12 @@
     <string>Синхронная</string>
    </property>
   </action>
-  <action name="MDSynch">
+  <action name="mDSynch">
    <property name="text">
     <string>Синхронная</string>
    </property>
   </action>
-  <action name="MDAsynch">
+  <action name="mDAsynch">
    <property name="text">
     <string>Асинхронная</string>
    </property>
@@ -224,9 +395,29 @@
     <string>Назад</string>
    </property>
   </action>
-  <action name="MMainPage">
+  <action name="mMainPage">
    <property name="text">
     <string>Главная страница</string>
+   </property>
+  </action>
+  <action name="mSettings">
+   <property name="text">
+    <string>Настройки</string>
+   </property>
+  </action>
+  <action name="rGetHelp">
+   <property name="text">
+    <string>Получить помощь</string>
+   </property>
+  </action>
+  <action name="mEncryptPage">
+   <property name="text">
+    <string>Шифровка</string>
+   </property>
+  </action>
+  <action name="mDecryptPage">
+   <property name="text">
+    <string>Дешифровка</string>
    </property>
   </action>
  </widget>
