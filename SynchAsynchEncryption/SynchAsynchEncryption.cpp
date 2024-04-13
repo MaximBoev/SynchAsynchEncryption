@@ -17,18 +17,7 @@
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 #include <openssl/engine.h>
-#include "base64.h"
 
-#define PRIVATE_KEY_BITS 256
-#define PADDING RSA_PKCS1_PADDING
-#define DEBUG 1
-
-using RSA_ptr = std::unique_ptr<RSA, decltype(&::RSA_free)>;
-using EVP_KEY_ptr = std::unique_ptr<EVP_PKEY, decltype(&::EVP_PKEY_free)>;
-using BIGNUM_ptr = std::unique_ptr<BIGNUM, decltype(&::BN_free)>;
-using BIO_MEM_ptr = std::unique_ptr<BIO, decltype(&::BIO_free)>;
-using BIO_MEM_BUF_ptr = std::unique_ptr<BUF_MEM, decltype(&::BUF_MEM_free)>;
-using BIO_FILE_ptr = std::unique_ptr<BIO, decltype(&::BIO_free)>;
 
 SynchAsynchEncryption::SynchAsynchEncryption(QWidget *parent)
     : QMainWindow(parent)
@@ -66,152 +55,6 @@ void SynchAsynchEncryption::exitButtonPush()
     if (status == QMessageBox::Yes) QApplication::quit();
 }
 
-void SynchAsynchEncryption::GenKey(std::string& str_public_key, std::string& str_private_key) {
-    int rc;
-
-    RSA_ptr rsa(RSA_new(), ::RSA_free);  // openssl rsa pointer
-    BIGNUM_ptr bn(BN_new(), ::BN_free);  // bignum
-
-    int bits = PRIVATE_KEY_BITS;
-    unsigned long e = RSA_F4;
-
-    rc = BN_set_word(bn.get(), e);
-    assert(rc == 1);
-
-    // Generate RSA key
-    rc = RSA_generate_key_ex(rsa.get(), bits, bn.get(), NULL);
-    assert(rc == 1);
-
-    // Convert RSA to Private Key
-    EVP_KEY_ptr public_key(EVP_PKEY_new(), ::EVP_PKEY_free);
-    rc = EVP_PKEY_set1_RSA(public_key.get(), rsa.get());
-    assert(rc == 1);
-
-    // Create 2 in-memory BIO for public key and private key
-    BIO_MEM_ptr public_key_bio(BIO_new(BIO_s_mem()), ::BIO_free);
-    BIO_MEM_ptr private_key_bio(BIO_new(BIO_s_mem()), ::BIO_free);
-    // Write Public Key in Traditional PEM
-    rc = PEM_write_bio_PUBKEY(public_key_bio.get(), public_key.get());
-    assert(rc == 1);
-
-    // Write Private Key in Traditional PEM
-    rc = PEM_write_bio_RSAPrivateKey(private_key_bio.get(), rsa.get(), NULL, NULL, 0, NULL, NULL);
-    assert(rc == 1);
-
-    size_t pkey_length = BIO_pending(public_key_bio.get());
-    size_t key_length = BIO_pending(private_key_bio.get());
-
-    std::unique_ptr<char> pkey_buff((char*)malloc(pkey_length + 1));
-    std::unique_ptr<char> key_buff((char*)malloc(key_length + 1));
-
-    BIO_read(public_key_bio.get(), pkey_buff.get(), pkey_length);
-    BIO_read(private_key_bio.get(), key_buff.get(), key_length);
-
-    // NULL Terminator
-    pkey_buff.get()[pkey_length] = '\0';
-    key_buff.get()[key_length] = '\0';
-
-    str_public_key.assign(pkey_buff.get(), pkey_length);
-    str_private_key.assign(key_buff.get(), key_length);
-
-#if DEBUG
-    std::cout << "Public key buffer length: " << pkey_length << std::endl;
-    std::cout << "Private key buffer length: " << key_length << std::endl;
-#endif
-
-}
-
-bool SynchAsynchEncryption::Encrypt(const std::string rsa_public_key, const std::string source,
-    std::string& dest) {
-    /*
-     * @Param:
-     * 		rsa_public_key: Traditional PEM Public Key
-     * 		source: std::string need to encrypted
-     * @Output:
-     * 		dest: Encrypted std::string
-     * */
-    size_t rsa_public_key_len = rsa_public_key.size()
-        * sizeof(std::string::value_type);
-    size_t msg_size = source.size() * sizeof(std::string::value_type);
-
-    // LOAD PUBLIC KEY FROMS STRING USING OpenSSL's API
-    BIO_MEM_ptr bio(BIO_new(BIO_s_mem()), ::BIO_free); // I/O abstraction
-    // BIO_new_mem_buf((void*) rsa_public_key.c_str(), -1)
-    BIO_write(bio.get(), rsa_public_key.c_str(), rsa_public_key_len);
-    BIO_set_flags(bio.get(), BIO_FLAGS_BASE64_NO_NL);
-    // Read public key
-    RSA_ptr _public_key(PEM_read_bio_RSA_PUBKEY(bio.get(), NULL, 0, NULL),
-        ::RSA_free);
-    if (!_public_key.get()) {
-        printf(
-            "ERROR: Could not load PUBLIC KEY!  PEM_read_bio_RSA_PUBKEY FAILED: %s\n",
-            ERR_error_string(ERR_get_error(), NULL)
-        );
-        return false;
-    }
-    int rsa_len = RSA_size(_public_key.get());
-
-    std::unique_ptr<unsigned char> encrypted((unsigned char*)malloc(rsa_len));
-    size_t encrypted_data_len = RSA_public_encrypt(msg_size,
-        (const unsigned char*)source.c_str(), encrypted.get(),
-        _public_key.get(), PADDING);
-    if (encrypted_data_len == -1) {
-        printf(
-            "ERROR: RSA_public_encrypt: %s\n",
-            ERR_error_string(ERR_get_error(), NULL)
-        );
-        return false;
-    }
-
-    // To base 64
-    int ascii_base64_encrypted_len;
-    std::unique_ptr<char> ascii_base64_encrypted(
-        base64(encrypted.get(), encrypted_data_len,
-            &ascii_base64_encrypted_len));
-
-    dest.assign(ascii_base64_encrypted.get(), ascii_base64_encrypted_len);
-
-    return true;
-}
-
-bool SynchAsynchEncryption::Decrypt(const std::string private_key, const std::string source,
-    std::string& dest) {
-    // Code ngu người những vẫn chạy, must be magic
-    int bin_encrypted_len;
-    std::unique_ptr<unsigned char> bin_encrypted(
-        unbase64(source.c_str(), source.length(), &bin_encrypted_len));
-
-    // LOAD PRIVATE KEY FROM STRING USING OpenSSL API
-    BIO_MEM_ptr bio(BIO_new_mem_buf((void*)private_key.c_str(), -1),
-        ::BIO_free);
-    RSA_ptr _private_key(PEM_read_bio_RSAPrivateKey(bio.get(), NULL, 0, NULL),
-        ::RSA_free);
-
-    if (!_private_key.get()) {
-        printf(
-            "ERROR: Could not load PRIVATE KEY!  PEM_read_bio_RSAPrivateKey FAILED: %s\n",
-            ERR_error_string(ERR_get_error(), NULL));
-        return false;
-    }
-
-    size_t rsa_len = RSA_size(_private_key.get());
-    std::unique_ptr<unsigned char> bin_decrypted(
-        (unsigned char*)malloc(rsa_len));
-
-    size_t decrypted_data_len = RSA_private_decrypt(rsa_len,
-        bin_encrypted.get(), bin_decrypted.get(), _private_key.get(),
-        PADDING);
-    if (decrypted_data_len == -1) {
-        printf("ERROR: RSA_private_decrypt: %s\n",
-            ERR_error_string(ERR_get_error(), NULL));
-        return false;
-    }
-
-    dest.assign(reinterpret_cast<char*>(bin_decrypted.get()), decrypted_data_len);
-
-    return true;
-}
-
 void SynchAsynchEncryption::encrypt()
 {
     if (!ui.synchRadioButton_EP->isChecked() && !ui.asynchRadioButton_EP->isChecked()) {
@@ -223,51 +66,68 @@ void SynchAsynchEncryption::encrypt()
 }
 
 void SynchAsynchEncryption::encryptSynch()
-{
-   QString thisText_ = ui.plainTextEditInput_EP->toPlainText();
-   std::string thisText = thisText_.toStdString();
-   std::string thisKey = generateRandomKey();
-   std::string iv;
-   EVP_CIPHER_CTX* ctx;
-   ctx = EVP_CIPHER_CTX_new();
-   EVP_CIPHER_CTX_init(ctx);
+{  
+   bool success = true;
+
+    // Получаем с поля ввода текста сам текст, переводим в массив байтов и генерируем ключь.
+   QString thisText_QS = ui.plainTextEditInput_EP->toPlainText();
+   QByteArray thisText_QBA = thisText_QS.toUtf8();
+   QByteArray thisKey_QBA = randomBytes();
    
+    // Инициализируем контекст.
+   EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    
+    // Инициализация iv.
    unsigned char iv_buffer[EVP_MAX_IV_LENGTH];
    RAND_bytes(iv_buffer, EVP_MAX_IV_LENGTH);
-   iv = std::string(reinterpret_cast<const char*>(iv_buffer), EVP_MAX_IV_LENGTH);
    
-   std::string encrypted_text;
+    // Инициализаци самого алгоритма контекстом, методом шифровани, ключем и iv.
+   if (!EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, reinterpret_cast<const unsigned char*>(thisKey_QBA.data()), iv_buffer)) {
+       assert(1 != 1);
+       success = false;
+   }
+    // Инициализация необходимых размерных переменных.
+   int len = thisText_QBA.size();
+   int len_c = len + AES_BLOCK_SIZE;
+   int len_f = 0;
+   unsigned char* cipher = new unsigned char[len_c];
+
+    // Проверка готовности алгоритма к использованию.
+   if (!EVP_EncryptInit_ex(ctx, NULL, NULL, NULL, NULL)) {
+       assert(2 != 2);
+       success = false;
+   }
+
+   if (!EVP_EncryptUpdate(ctx, cipher, &len_c, reinterpret_cast<const unsigned char*>(thisKey_QBA.data()), len)) {
+       assert(3 != 3);
+       success = false;
+   }
+
+   if (!EVP_EncryptFinal(ctx, cipher+len_c, &len_f)) {
+       assert(4 != 4);
+       success = false;
+   }
+   len = len_c + len_f;
+
+   QByteArray thisEncryptText_QBA;
+   if (success) {
+       QByteArray tmp_QBA = QByteArray(reinterpret_cast<char*> (cipher), len);
+       thisEncryptText_QBA.append(QByteArray(reinterpret_cast<char*>(iv_buffer), EVP_MAX_IV_LENGTH));
+       thisEncryptText_QBA.append(tmp_QBA);
+   }
+   encryptText = thisEncryptText_QBA;
+   QString encryptedTextHex_QS = QString(thisEncryptText_QBA.toHex());
+   QString thisKeyHex_QS = QString(thisKey_QBA.toHex());
    
-   EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, reinterpret_cast<const unsigned char*>(thisKey.c_str()), reinterpret_cast<const unsigned char*>(iv.c_str()));
-   
-   int cipher_text_len = thisText.length() + EVP_MAX_BLOCK_LENGTH;
-   unsigned char* cipher_text = new unsigned char[cipher_text_len];
-   
-   int actual_cipher_text_len;
-   
-   EVP_EncryptUpdate(ctx, cipher_text, &actual_cipher_text_len, reinterpret_cast<const unsigned char*>(thisText.c_str()), thisText.length());
-   encrypted_text.append(reinterpret_cast<const char*>(cipher_text), actual_cipher_text_len);
-   
-   delete[] cipher_text;
-   
+   ui.plainTextEditOutput_EP->setPlainText(encryptedTextHex_QS);
+   ui.plainTextEditKeySynch->setPlainText(thisKeyHex_QS);
+
    EVP_CIPHER_CTX_free(ctx);
-   
-   QByteArray encryptedTextByteArray(reinterpret_cast<const char*>(encrypted_text.data()), encrypted_text.length());
-   QByteArray thisKeyByteArray(thisKey.c_str(), thisKey.length());
-   
-   QString encryptedTextHex = QString(encryptedTextByteArray.toHex());
-   QString thisKeyHex = QString(thisKeyByteArray.toHex());
-   
-   ui.plainTextEditOutput_EP->setPlainText(encryptedTextHex);
-   ui.plainTextEditKeySynch->setPlainText(thisKeyHex);
 }
 
 void SynchAsynchEncryption::encryptAsynch()
 {
-    QString thisText_ = ui.plainTextEditInput_EP->toPlainText();
-    std::string thisText = thisText_.toStdString();
-    
-    GenKey(publicKey, privateKey);
+
 }
 
 void SynchAsynchEncryption::decrypt()
@@ -282,45 +142,71 @@ void SynchAsynchEncryption::decrypt()
 
 void SynchAsynchEncryption::decryptSynch()
 {
-    QString encryptedText_ = ui.plainTextEditInput_DP->toPlainText();
-    QString thisKey_ = ui.plainTextEditKeySynch->toPlainText();
-    std::string decryptedText_;
+    bool success = true;
+
+    QString thisEncryptedText_QS = ui.plainTextEditInput_DP->toPlainText();
+    QString thisKey_QS = ui.plainTextEditKeySynch->toPlainText();
     
-    std::string encryptedText = hexDecode(encryptedText_.toStdString());
-    std::string thisKey = hexDecode(thisKey_.toStdString());
+    std::string thisEncryptedText_S = hexDecode(thisEncryptedText_QS.toStdString());
+    std::string thisKey_S = hexDecode(thisKey_QS.toStdString());
+
+    QByteArray thisEncryptedText_QBA(thisEncryptedText_S.c_str(), thisEncryptedText_S.length());
+    QByteArray thisKey_QBA(thisKey_S.c_str(), thisKey_S.length());
+
+    assert(thisEncryptedText_QBA == encryptText);
+
+    QByteArray ivData_QBA = thisEncryptedText_QBA.mid(0, EVP_MAX_IV_LENGTH);
+    QByteArray encryptedTextData_QBA = thisEncryptedText_QBA.mid(EVP_MAX_IV_LENGTH);
+
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    if (!EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, reinterpret_cast<const unsigned char*>(thisKey_QBA.data())
+        , reinterpret_cast<const unsigned char*>(ivData_QBA.data()))) {
+        assert(1 != 1);
+        success = false;
+    }
+
+    int len = encryptedTextData_QBA.size();
+    int len_f = 0;
+    int len_p = len;
+    unsigned char* decipher = new unsigned char[len_p + AES_BLOCK_SIZE];
+
+    if (!EVP_DecryptUpdate(ctx, decipher, &len_p, reinterpret_cast<const unsigned char*>(encryptedTextData_QBA.data()), len)) {
+        assert(2 != 2);
+        success = false;
+    }
+
+    if (!EVP_DecryptFinal_ex(ctx, decipher + len_p, &len_f)) {
+        assert(3 != 3);
+        success = false;
+    }
+    len = len_p + len_f;
+    QByteArray thisDecryptedText_QBA;
     
-    EVP_CIPHER_CTX* ctx;
-    ctx = EVP_CIPHER_CTX_new();
-    EVP_CIPHER_CTX_init(ctx);
-    
-    std::string iv(encryptedText.begin(), encryptedText.begin() + EVP_MAX_IV_LENGTH);
-    encryptedText.erase(encryptedText.begin(), encryptedText.begin() + EVP_MAX_IV_LENGTH);
-    
-    EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, reinterpret_cast<const unsigned char*>(thisKey.c_str()), reinterpret_cast<const unsigned char*>(iv.c_str()));
-    
-    int decryptedTextLen = 0;
-    unsigned char* decryptedTextBuffer = new unsigned char[encryptedText.length() + EVP_MAX_BLOCK_LENGTH];
-    
-    int actualDecryptedTextLen;
-    
-    EVP_DecryptUpdate(ctx, decryptedTextBuffer, &actualDecryptedTextLen, reinterpret_cast<const unsigned char*>(encryptedText.c_str()), encryptedText.length());
-    decryptedTextLen += actualDecryptedTextLen;
-    
-    EVP_DecryptFinal_ex(ctx, decryptedTextBuffer + decryptedTextLen, &actualDecryptedTextLen);
-    decryptedTextLen += actualDecryptedTextLen;
-    
-    decryptedText_.append(reinterpret_cast<const char*>(decryptedTextBuffer), decryptedTextLen);
-    
-    delete[] decryptedTextBuffer;
-    
+    if (success) {
+        thisDecryptedText_QBA = QByteArray(reinterpret_cast<char*>(decipher), len);
+    }
+
+    QString thisDecryptedText_QS = thisDecryptedText_QBA.toBase64();
+    ui.plainTextEditOutput_DP->setPlainText(thisDecryptedText_QS);
+
     EVP_CIPHER_CTX_free(ctx);
-    
-    ui.plainTextEditOutput_DP->setPlainText(QString::fromStdString(decryptedText_));
+    delete[] decipher;
 }
 
 void SynchAsynchEncryption::decryptAsynch()
 {
 
+}
+
+QByteArray SynchAsynchEncryption::randomBytes()
+{
+    unsigned char* arr;
+    int length = EVP_CIPHER_key_length(EVP_aes_256_cbc());
+    arr = new unsigned char[length];
+    RAND_bytes(arr, length);
+    QByteArray result(reinterpret_cast<char*>(arr), length);
+    delete[] arr;
+    return result;
 }
 
 std::string SynchAsynchEncryption::generateRandomKey() {
